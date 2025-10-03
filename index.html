@@ -10,34 +10,61 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <style>
-  body { margin:0; font-family:Arial,Helvetica,sans-serif; background:#f4f6f9; }
-  #map { height: 500px; }
+  body { margin:0; font-family:Arial,Helvetica,sans-serif; background:#eef2f7; }
+  #map { height: 520px; border-radius:12px; margin:20px auto; max-width:1000px; }
   .panel {
-    max-width:860px; margin:20px auto; padding:16px;
-    background:#fff; border-radius:10px; box-shadow:0 3px 10px rgba(0,0,0,.1);
+    max-width:1000px; margin:20px auto; padding:20px;
+    background:#fff; border-radius:12px; box-shadow:0 4px 14px rgba(0,0,0,.1);
   }
-  h2 { margin-top:0; color:#0a2e6b; }
-  label { display:block; margin-top:8px; font-size:14px; font-weight:600; color:#333; }
-  select, input { width:100%; padding:8px; margin-top:4px;
+  h2 { margin-top:0; color:#0a2e6b; font-size:22px; }
+  label { display:block; margin-top:12px; font-size:14px; font-weight:600; color:#222; }
+  select, input { width:100%; padding:8px; margin-top:6px;
     border-radius:6px; border:1px solid #ccd3dc; font-size:14px; }
   button {
-    margin-top:14px; padding:10px 16px;
+    margin-top:18px; padding:12px 20px;
     background:#0a57a4; color:#fff; border:none;
-    border-radius:6px; font-size:14px; cursor:pointer; font-weight:600;
+    border-radius:8px; font-size:15px; cursor:pointer; font-weight:600;
+    box-shadow:0 2px 6px rgba(0,0,0,.2);
   }
   button:hover { background:#084881; }
-  .result { margin-top:14px; padding:12px; background:#f9fbff; border:1px solid #d0e0f0; border-radius:8px; }
+  .result { margin-top:18px; padding:14px; background:#f9fbff; border:1px solid #d0e0f0; border-radius:10px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; }
 </style>
 </head>
 <body>
 
 <div class="panel">
-  <h2>Oklahoma Trip MPG Estimator</h2>
-  <p>Click on the map to set your <strong>start</strong> and <strong>end</strong> points, then calculate your estimated fuel usage with local traffic & weather conditions.</p>
+  <h2>🚗 Oklahoma Trip MPG Estimator</h2>
+  <p>Select a start and end point (from the dropdowns or by clicking on the map). Adjust for real Oklahoma driving conditions like traffic, wind, and towing. Then estimate your fuel economy.</p>
   
+  <div class="grid">
+    <div>
+      <label for="start">Start Location</label>
+      <select id="start">
+        <option value="">-- Select a city or click on map --</option>
+        <option value="35.4676,-97.5164">Oklahoma City</option>
+        <option value="35.5078,-97.7626">Yukon</option>
+        <option value="35.2226,-97.4395">Norman</option>
+        <option value="36.1539,-95.9928">Tulsa</option>
+        <option value="34.7465,-92.2896">Little Rock (nearby)</option>
+      </select>
+    </div>
+    <div>
+      <label for="end">End Location</label>
+      <select id="end">
+        <option value="">-- Select a city or click on map --</option>
+        <option value="35.4676,-97.5164">Oklahoma City</option>
+        <option value="35.5078,-97.7626">Yukon</option>
+        <option value="35.2226,-97.4395">Norman</option>
+        <option value="36.1539,-95.9928">Tulsa</option>
+        <option value="34.7465,-92.2896">Little Rock (nearby)</option>
+      </select>
+    </div>
+  </div>
+
   <label for="engine">Choose Engine</label>
   <select id="engine">
-    <option value="22">3.5L PowerBoost Hybrid — est. 23 MPG</option>
+    <option value="23">3.5L PowerBoost Hybrid — est. 23 MPG</option>
     <option value="21">2.7L EcoBoost — est. 21 MPG</option>
     <option value="20">3.5L EcoBoost — est. 20 MPG</option>
     <option value="19">5.0L V8 — est. 19 MPG</option>
@@ -45,13 +72,40 @@
     <option value="16">High Output EcoBoost (Raptor) — est. 16 MPG</option>
   </select>
 
-  <label for="condition">Driving Conditions</label>
-  <select id="condition">
-    <option value="0">Normal (baseline)</option>
-    <option value="0.15">Rush Hour / Heavy Traffic (+15% fuel use)</option>
-    <option value="0.10">Strong Crosswinds / Storms (+10%)</option>
-    <option value="-0.05">Rural Highway / Light Traffic (-5%)</option>
-  </select>
+  <div class="grid">
+    <div>
+      <label for="traffic">Traffic Conditions</label>
+      <select id="traffic">
+        <option value="0">Normal</option>
+        <option value="0.15">Rush Hour / Congested (+15%)</option>
+        <option value="-0.05">Light Traffic (-5%)</option>
+      </select>
+    </div>
+    <div>
+      <label for="weather">Weather</label>
+      <select id="weather">
+        <option value="0">Clear</option>
+        <option value="0.10">Strong Crosswinds / Storms (+10%)</option>
+        <option value="0.05">Hot Summer A/C Use (+5%)</option>
+      </select>
+    </div>
+    <div>
+      <label for="towing">Towing / Load</label>
+      <select id="towing">
+        <option value="0">No Load</option>
+        <option value="0.10">Moderate Load (+10%)</option>
+        <option value="0.20">Heavy Towing (+20%)</option>
+      </select>
+    </div>
+    <div>
+      <label for="tire">Tire Pressure</label>
+      <select id="tire">
+        <option value="0">Optimal</option>
+        <option value="0.05">Slightly Low (+5%)</option>
+        <option value="0.10">Very Low (+10%)</option>
+      </select>
+    </div>
+  </div>
 
   <button id="calcBtn">Estimate Trip MPG</button>
   
@@ -62,30 +116,44 @@
 
 <script>
 // Leaflet map centered on Oklahoma
-const map = L.map('map').setView([35.5, -97.5], 7); // Oklahoma City area
-
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom:19, attribution:'© OpenStreetMap contributors'
+const map = L.map('map').setView([35.5, -97.5], 7);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution:'&copy; <a href="https://www.openstreetmap.org/">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+  subdomains:'abcd', maxZoom:19
 }).addTo(map);
 
 let startMarker = null, endMarker = null;
 
+// function to set marker from dropdown
+function setMarker(val, type){
+  if(!val) return;
+  const [lat,lng] = val.split(',').map(Number);
+  const marker = L.marker([lat,lng], {draggable:true}).addTo(map).bindPopup(type+" Point").openPopup();
+  if(type==="Start"){ if(startMarker) map.removeLayer(startMarker); startMarker=marker; }
+  else { if(endMarker) map.removeLayer(endMarker); endMarker=marker; }
+  map.setView([lat,lng],8);
+}
+
+document.getElementById('start').addEventListener('change', e => setMarker(e.target.value,"Start"));
+document.getElementById('end').addEventListener('change', e => setMarker(e.target.value,"End"));
+
+// allow clicking on map
 map.on('click', function(e){
   if(!startMarker){
     startMarker = L.marker(e.latlng, {draggable:true}).addTo(map).bindPopup("Start Point").openPopup();
   } else if(!endMarker){
     endMarker = L.marker(e.latlng, {draggable:true}).addTo(map).bindPopup("End Point").openPopup();
   } else {
-    // reset if both exist
     map.removeLayer(startMarker); map.removeLayer(endMarker);
     startMarker = L.marker(e.latlng, {draggable:true}).addTo(map).bindPopup("Start Point").openPopup();
     endMarker = null;
   }
 });
 
+// Haversine formula
 function haversine(lat1, lon1, lat2, lon2) {
   function toRad(x){ return x*Math.PI/180; }
-  const R=3958.8; // miles
+  const R=3958.8; 
   const dLat=toRad(lat2-lat1), dLon=toRad(lon2-lon1);
   const a=Math.sin(dLat/2)**2+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
   return 2*R*Math.asin(Math.sqrt(a));
@@ -93,17 +161,18 @@ function haversine(lat1, lon1, lat2, lon2) {
 
 document.getElementById('calcBtn').addEventListener('click', () => {
   if(!startMarker || !endMarker){
-    alert("Please click on the map to set both start and end points.");
+    alert("Please set both start and end points.");
     return;
   }
   const s=startMarker.getLatLng(), e=endMarker.getLatLng();
-  const dist = haversine(s.lat, s.lng, e.lat, e.lng); // straight line distance
-  const adjustedDist = dist * 1.25; // crude road distance factor
+  const dist = haversine(s.lat, s.lng, e.lat, e.lng);
+  const adjustedDist = dist * 1.25; 
 
   const baseMPG = parseFloat(document.getElementById('engine').value);
-  const condFactor = parseFloat(document.getElementById('condition').value);
+  const factors = ["traffic","weather","towing","tire"].map(id => parseFloat(document.getElementById(id).value));
+  const totalFactor = factors.reduce((a,b)=>a+b,0);
 
-  const effectiveMPG = baseMPG * (1 - condFactor);
+  const effectiveMPG = baseMPG * (1 - totalFactor);
   const gallonsNeeded = adjustedDist / effectiveMPG;
 
   document.getElementById('result').style.display='block';
@@ -111,7 +180,7 @@ document.getElementById('calcBtn').addEventListener('click', () => {
     <strong>Trip Distance:</strong> ~${adjustedDist.toFixed(1)} miles<br/>
     <strong>Effective MPG:</strong> ${effectiveMPG.toFixed(1)} MPG<br/>
     <strong>Estimated Fuel Used:</strong> ${gallonsNeeded.toFixed(1)} gallons<br/>
-    <small>Note: This is a simple estimator. Actual results depend on driving route, speed, load, and conditions in Oklahoma.</small>
+    <small>Conditions factored: Traffic, Weather, Towing, Tire PSI</small>
   `;
 });
 </script>
